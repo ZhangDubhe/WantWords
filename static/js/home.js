@@ -118,6 +118,9 @@ $(document).ready(function(){ // 必须有这一行，在页面加载之后执�
             });
     });
 });
+$(document).ready(function () {
+    handleUrlQuery();
+});
 
 //<!--反馈信息的获取-->
 var getSelectedTabId = 0;
@@ -150,6 +153,45 @@ $(function () {
         }
     });
 })
+
+function handleUrlQuery() {
+    var query = window.location.search;
+    if (query.length > 0) {
+        query = query.substring(1);
+        var queryObj = {};
+        var query_list = query.split("&");
+        for (var i = 0; i < query_list.length; i++) {
+            var pair = query_list[i].split("=");
+            queryObj[pair[0]] = pair[1];
+        }
+        if (!!queryObj.tab) {
+            var tab_id = ['zh', 'en', 'zh-en', 'en-zh'].indexOf(pair[1] || 'zh') + 1;
+            console.log(document.querySelector(`#tabs a[href="#tabs-${tab_id}"]`))
+            // $(`#tabs ul a[href="#tabs-${tab_id}"]`).tab('show');
+            $(`#tabs ul a[href="#tabs-${tab_id}"]`).class('active');
+        }
+        if (!!queryObj.query) {
+            var queryInputId = {
+                'zh': 'description',
+                'en': 'description_EE',
+                'zh-en': 'description_CE',
+                'en-zh': 'description_EC',
+            }[queryObj.tab || 'zh'];
+            $(`#${queryInputId}`).val(decodeURIComponent(queryObj['query']));
+            onkeySearch();
+            return;
+        }
+    }
+}
+function handleClickTab(type) {
+    var origin = location.search;
+    var search = origin.indexOf('tab=') > -1 ? origin.replace(/tab=[a-z-]*/, 'tab=' + type) : (origin ? `${origin}&tab=${type}` : `?tab=${type}`);
+    console.log('old', location.href);
+    var newUrl = origin ? location.href.replace(origin, search) : location.href + search;
+    console.log(newUrl);
+    location.href = newUrl;
+    // window.history.pushState({}, '', location.href.replace(origin, search));
+}
 
 function diagWord() {
     if (getSelectedTabId%2==0) {
